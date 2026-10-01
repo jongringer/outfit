@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Smart Closet Stylist - 스마트 옷장 & 코디</title>
+  <title>Smart Closet Stylist - 스마트 옷장 & 맞춤 코디</title>
   <style>
     :root {
       --bg-color: #0d0f12;
@@ -19,6 +19,10 @@
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
       --text-dim: #6b7280;
+      --brand-hazzys: #3b82f6;
+      --brand-daks: #d97706;
+      --brand-olzen: #059669;
+      --brand-andar: #8b5cf6;
     }
 
     * {
@@ -76,19 +80,38 @@
       z-index: 20;
     }
 
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
     .brand-title {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 800;
       letter-spacing: -0.4px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .brand-title span {
       background: linear-gradient(135deg, #60a5fa, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    /* 상단 선호 브랜드 선택 드롭다운 */
+    .brand-selector-header {
+      background: #11141a;
+      border: 1px solid var(--card-border);
+      color: #93c5fd;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 12px;
+      outline: none;
+      cursor: pointer;
     }
 
     .header-actions {
@@ -101,9 +124,9 @@
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-main);
-      padding: 6px 10px;
-      border-radius: 18px;
-      font-size: 0.72rem;
+      padding: 5px 9px;
+      border-radius: 16px;
+      font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
@@ -133,9 +156,9 @@
       overflow: hidden;
     }
 
-    /* 좌측 세로 옷장 사이드바 (약 30% 폭) */
+    /* 좌측 세로 옷장 사이드바 (약 32% 폭) */
     .closet-sidebar {
-      width: 32%;
+      width: 33%;
       min-width: 125px;
       max-width: 145px;
       background-color: var(--panel-bg);
@@ -143,7 +166,7 @@
       display: flex;
       flex-direction: column;
       padding: 8px 6px;
-      gap: 8px;
+      gap: 7px;
       z-index: 10;
     }
 
@@ -160,7 +183,7 @@
       background: none;
       border: none;
       color: var(--text-muted);
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       padding: 5px 0;
       border-radius: 6px;
       cursor: pointer;
@@ -179,14 +202,14 @@
     .filter-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .filter-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       color: var(--text-dim);
       font-weight: 600;
       padding: 0 2px;
@@ -196,14 +219,14 @@
       display: flex;
       gap: 4px;
       overflow-x: auto;
-      padding: 2px 1px 4px 1px;
+      padding: 2px 1px 3px 1px;
       scrollbar-width: none;
     }
     .filter-chips::-webkit-scrollbar { display: none; }
 
     .color-chip {
-      width: 17px;
-      height: 17px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.25);
       flex-shrink: 0;
@@ -218,12 +241,12 @@
     }
 
     .text-chip {
-      padding: 2px 6px;
-      border-radius: 10px;
+      padding: 2px 5px;
+      border-radius: 8px;
       background: #0d0f14;
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
@@ -233,6 +256,20 @@
       color: #fff;
       border-color: var(--accent-blue);
     }
+
+    /* 브랜드 태그 뱃지 */
+    .brand-tag {
+      font-size: 0.5rem;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 4px;
+      letter-spacing: -0.2px;
+    }
+    .brand-tag.hazzys { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .brand-tag.daks { background: rgba(217, 119, 6, 0.2); color: #fcd34d; }
+    .brand-tag.olzen { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .brand-tag.andar { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+    .brand-tag.etc { background: rgba(107, 114, 128, 0.2); color: #d1d5db; }
 
     /* 보유 아이템 목록 리스트 */
     .sidebar-items-wrap {
@@ -248,7 +285,7 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       scrollbar-width: none;
       padding-right: 1px;
     }
@@ -263,7 +300,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       position: relative;
       transition: border-color 0.15s, background-color 0.15s;
     }
@@ -273,17 +310,17 @@
     .item-card.selected {
       border-color: var(--accent-blue);
       background-color: rgba(59, 130, 246, 0.15);
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
     }
 
     .item-thumb {
       width: 100%;
-      height: 42px;
+      height: 40px;
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.35rem;
+      font-size: 1.3rem;
       background-color: #242a36;
       overflow: hidden;
     }
@@ -294,7 +331,7 @@
     }
 
     .item-name {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 600;
       text-align: center;
       white-space: nowrap;
@@ -308,6 +345,9 @@
       font-size: 0.52rem;
       color: var(--text-muted);
       text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 3px;
     }
 
     .item-del-btn {
@@ -400,24 +440,32 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       z-index: 3;
-      padding: 10px;
+      padding: 8px;
       width: 100%;
       height: 100%;
       text-align: center;
     }
 
+    .stage-brand-pill {
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: -0.2px;
+    }
+
     .stage-icon-wrap {
-      width: 76px;
-      height: 76px;
+      width: 74px;
+      height: 74px;
       border-radius: 16px;
       background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(30, 35, 48, 0.5) 100%);
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
+      font-size: 2.7rem;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -429,21 +477,21 @@
     }
 
     .stage-title {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
     .stage-sub {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       color: var(--text-muted);
       background: rgba(0, 0, 0, 0.4);
       padding: 2px 8px;
       border-radius: 10px;
     }
 
-    /* 좌우 스와이프/탐색 버튼 */
+    /* 좌우 탐색 버튼 */
     .stage-nav {
       position: absolute;
       top: 50%;
@@ -605,7 +653,7 @@
       color: var(--accent-blue);
     }
 
-    /* 5. 모달 (아이템 등록 & 설정) */
+    /* 5. 모달 */
     .modal-overlay {
       position: absolute;
       top: 0;
@@ -633,7 +681,7 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
 
@@ -655,7 +703,7 @@
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
     .form-label {
       font-size: 0.66rem;
@@ -666,7 +714,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.75rem;
       outline: none;
@@ -704,9 +752,20 @@
   <div class="app-viewport" id="appViewport">
     <!-- 1. 상단 탑바 -->
     <header>
-      <div class="brand-title">
-        <span>Closet</span>Stylist
+      <div class="brand-title-wrap">
+        <div class="brand-title">
+          <span>Closet</span>Stylist
+        </div>
+        <!-- 선호 브랜드 설정 드롭다운 -->
+        <select class="brand-selector-header" id="headerBrandFilter" onchange="onBrandFilterChange(this.value)">
+          <option value="ALL">전체 브랜드 ▾</option>
+          <option value="헤지스" selected>헤지스 (HAZZYS)</option>
+          <option value="닥스">닥스 (DAKS)</option>
+          <option value="올젠">올젠 (OLZEN)</option>
+          <option value="안다르">안다르 (andar)</option>
+        </select>
       </div>
+
       <div class="header-actions">
         <button class="icon-btn" id="btnAddItem" onclick="openAddModal()">
           ➕ 등록
@@ -752,7 +811,7 @@
             <span>소재</span>
           </div>
           <div class="filter-chips" id="fabricChips">
-            <div class="text-chip" data-fabric="ALL" onclick="filterFabric('ALL')">전체</div>
+            <div class="text-chip active" data-fabric="ALL" onclick="filterFabric('ALL')">전체</div>
             <div class="text-chip" data-fabric="COTTON" onclick="filterFabric('COTTON')">코튼</div>
             <div class="text-chip" data-fabric="LINEN" onclick="filterFabric('LINEN')">린넨</div>
             <div class="text-chip" data-fabric="DENIM" onclick="filterFabric('DENIM')">데님</div>
@@ -785,6 +844,7 @@
           <button class="stage-nav prev" id="topNavPrev" onclick="navigateItem('TOP', -1)" style="display:none;">◀</button>
           
           <div class="stage-item-display" id="stageTopDisplay">
+            <div class="stage-brand-pill" id="topBrandPill">헤지스</div>
             <div class="stage-icon-wrap" id="topIconWrap">👔</div>
             <div class="stage-title" id="topTitle">상의 선택</div>
             <div class="stage-sub" id="topSub">목록에서 클릭 또는 스와이프</div>
@@ -802,6 +862,7 @@
           <button class="stage-nav prev" id="bottomNavPrev" onclick="navigateItem('BOTTOM', -1)">◀</button>
 
           <div class="stage-item-display" id="stageBottomDisplay">
+            <div class="stage-brand-pill" id="bottomBrandPill">올젠</div>
             <div class="stage-icon-wrap" id="bottomIconWrap">👖</div>
             <div class="stage-title" id="bottomTitle">하의 자동 매칭</div>
             <div class="stage-sub" id="bottomSub">상의에 맞춘 조화 추천</div>
@@ -830,19 +891,19 @@
         <div class="rec-card" id="shoesCard">
           <div class="rec-icon" id="shoesIcon">👞</div>
           <div class="rec-details">
-            <span class="rec-sub">보유 슈즈 매칭</span>
-            <span class="rec-main" id="shoesTitle">화이트 스니커즈</span>
+            <span class="rec-sub" id="shoesBrandLabel">소장 슈즈 매칭</span>
+            <span class="rec-main" id="shoesTitle">화이트 레더 스니커즈</span>
             <span class="rec-link-label closet" id="shoesDesc">내 옷장 코디 연동</span>
           </div>
         </div>
 
-        <!-- 선호 브랜드 갭 보충 카드 -->
-        <a class="rec-card" id="gapBrandCard" href="https://www.musinsa.com" target="_blank" rel="noopener">
+        <!-- 선호 브랜드 갭 보충 카드 (헤지스/닥스/올젠/안다르 공식몰 직결) -->
+        <a class="rec-card" id="gapBrandCard" href="https://www.lfmall.co.kr" target="_blank" rel="noopener">
           <div class="rec-icon" id="gapIcon">🔍</div>
           <div class="rec-details">
-            <span class="rec-sub" id="gapSubLabel">부족 아이템 갭 채우기</span>
+            <span class="rec-sub" id="gapSubLabel">선호 브랜드 추천</span>
             <span class="rec-main" id="gapItemTitle">브라운 가죽 벨트</span>
-            <span class="rec-link-label" id="gapBrandName">무신사 스탠다드 검색 ↗</span>
+            <span class="rec-link-label" id="gapBrandName">헤지스 공식몰 검색 ↗</span>
           </div>
         </a>
       </div>
@@ -857,6 +918,17 @@
         </div>
 
         <div class="form-group">
+          <label class="form-label">브랜드</label>
+          <select class="form-select" id="newBrand">
+            <option value="헤지스" selected>헤지스 (HAZZYS)</option>
+            <option value="닥스">닥스 (DAKS)</option>
+            <option value="올젠">올젠 (OLZEN)</option>
+            <option value="안다르">안다르 (andar)</option>
+            <option value="기타">기타 브랜드</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label class="form-label">카테고리</label>
           <select class="form-select" id="newCategory">
             <option value="TOP">상의 (TOP)</option>
@@ -868,7 +940,7 @@
 
         <div class="form-group">
           <label class="form-label">아이템 이름</label>
-          <input type="text" class="form-input" id="newName" placeholder="예: 린넨 카라 셔츠" maxlength="20">
+          <input type="text" class="form-input" id="newName" placeholder="예: 린넨 카라 셔츠" maxlength="25">
         </div>
 
         <div class="form-group">
@@ -910,29 +982,35 @@
 
   <script>
     /* ========================================================
-     * 1. 기본 옷장 데이터 & 영속성 관리 (LocalStorage)
+     * 1. 헤지스, 닥스, 올젠, 안다르 중심 맞춤 옷장 데이터 & 영속성
      * ======================================================== */
-    const STORAGE_KEY = 'SMART_CLOSET_ITEMS_V2';
+    const STORAGE_KEY = 'SMART_CLOSET_ITEMS_V3_BRANDS';
 
     const defaultItems = [
-      { id: 't1', category: 'TOP', name: '린넨 셔츠', color: 'NAVY', fabric: 'LINEN', icon: '👔' },
-      { id: 't2', category: 'TOP', name: '옥스포드 셔츠', color: 'WHITE', fabric: 'COTTON', icon: '👕' },
-      { id: 't3', category: 'TOP', name: '피케 카라티', color: 'BLACK', fabric: 'COTTON', icon: '👕' },
-      { id: 't4', category: 'TOP', name: '울 라운드 니트', color: 'BEIGE', fabric: 'WOOL', icon: '🧶' },
-      { id: 't5', category: 'TOP', name: '데님 셔츠', color: 'NAVY', fabric: 'DENIM', icon: '👔' },
+      // 헤지스 (HAZZYS)
+      { id: 'h1', brand: '헤지스', category: 'TOP', name: '아이코닉 피케 카라티', color: 'NAVY', fabric: 'COTTON', icon: '👕' },
+      { id: 'h2', brand: '헤지스', category: 'TOP', name: '프리미엄 린넨 셔츠', color: 'WHITE', fabric: 'LINEN', icon: '👔' },
+      { id: 'h3', brand: '헤지스', category: 'BOTTOM', name: '슬림 테이퍼드 데님', color: 'NAVY', fabric: 'DENIM', icon: '👖' },
+      { id: 'h4', brand: '헤지스', category: 'SHOES', name: '화이트 레더 스니커즈', color: 'WHITE', fabric: 'LEATHER', icon: '👟' },
+      { id: 'h5', brand: '헤지스', category: 'BELT', name: '헤리티지 블랙 레더 벨트', color: 'BLACK', fabric: 'LEATHER', icon: '🪢' },
 
-      { id: 'b1', category: 'BOTTOM', name: '치노 슬랙스', color: 'BEIGE', fabric: 'COTTON', icon: '👖' },
-      { id: 'b2', category: 'BOTTOM', name: '테이퍼드 슬랙스', color: 'CHARCOAL', fabric: 'WOOL', icon: '👖' },
-      { id: 'b3', category: 'BOTTOM', name: '생지 데님 팬츠', color: 'NAVY', fabric: 'DENIM', icon: '👖' },
-      { id: 'b4', category: 'BOTTOM', name: '린넨 이지 팬츠', color: 'WHITE', fabric: 'LINEN', icon: '🩳' },
-      { id: 'b5', category: 'BOTTOM', name: '카키 카고 슬랙스', color: 'KHAKI', fabric: 'COTTON', icon: '👖' },
+      // 닥스 (DAKS)
+      { id: 'd1', brand: '닥스', category: 'TOP', name: '하우스체크 코튼 셔츠', color: 'BEIGE', fabric: 'COTTON', icon: '👔' },
+      { id: 'd2', brand: '닥스', category: 'BOTTOM', name: '테일러드 울 슬랙스', color: 'CHARCOAL', fabric: 'WOOL', icon: '👖' },
+      { id: 'd3', brand: '닥스', category: 'SHOES', name: '브리티시 페니 로퍼', color: 'BROWN', fabric: 'LEATHER', icon: '👞' },
+      { id: 'd4', brand: '닥스', category: 'SHOES', name: '클래식 블랙 더비 슈즈', color: 'BLACK', fabric: 'LEATHER', icon: '👞' },
+      { id: 'd5', brand: '닥스', category: 'BELT', name: '리버서블 브라운 가죽 벨트', color: 'BROWN', fabric: 'LEATHER', icon: '🪢' },
 
-      { id: 's1', category: 'SHOES', name: '화이트 레더 스니커즈', color: 'WHITE', fabric: 'LEATHER', icon: '👟' },
-      { id: 's2', category: 'SHOES', name: '다크브라운 페니 로퍼', color: 'BROWN', fabric: 'LEATHER', icon: '👞' },
-      { id: 's3', category: 'SHOES', name: '블랙 더비 슈즈', color: 'BLACK', fabric: 'LEATHER', icon: '👞' },
+      // 올젠 (OLZEN)
+      { id: 'o1', brand: '올젠', category: 'TOP', name: '케이블 울 라운드 니트', color: 'CHARCOAL', fabric: 'WOOL', icon: '🧶' },
+      { id: 'o2', brand: '올젠', category: 'TOP', name: '옥스포드 버튼다운 셔츠', color: 'WHITE', fabric: 'COTTON', icon: '👔' },
+      { id: 'o3', brand: '올젠', category: 'BOTTOM', name: '스트레치 노턱 치노팬츠', color: 'BEIGE', fabric: 'COTTON', icon: '👖' },
+      { id: 'o4', brand: '올젠', category: 'BOTTOM', name: '린넨 블렌드 릴렉스 팬츠', color: 'WHITE', fabric: 'LINEN', icon: '🩳' },
 
-      { id: 'l1', category: 'BELT', name: '다크브라운 소가죽 벨트', color: 'BROWN', fabric: 'LEATHER', icon: '🪢' },
-      { id: 'l2', category: 'BELT', name: '블랙 스퀘어 버클 벨트', color: 'BLACK', fabric: 'LEATHER', icon: '🪢' }
+      // 안다르 (andar)
+      { id: 'a1', brand: '안다르', category: 'TOP', name: '에어스트 올데이 티셔츠', color: 'BLACK', fabric: 'COTTON', icon: '👕' },
+      { id: 'a2', brand: '안다르', category: 'BOTTOM', name: '에어스트 테이퍼드 슬랙스', color: 'BLACK', fabric: 'COTTON', icon: '👖' },
+      { id: 'a3', brand: '안다르', category: 'BOTTOM', name: '에어쿨링 맨즈 조거팬츠', color: 'KHAKI', fabric: 'COTTON', icon: '👖' }
     ];
 
     let closetItems = loadCloset();
@@ -958,17 +1036,33 @@
     }
 
     /* ========================================================
-     * 2. 스타일링 룰 엔진 (Color, Fabric, Leather Match)
+     * 2. 스타일링 룰 엔진 & 브랜드 공식 검색 연동 URL
      * ======================================================== */
     const colorRules = {
       'NAVY': { best: ['BEIGE', 'WHITE', 'CHARCOAL', 'KHAKI'], bad: ['BLACK'], baseScore: 92 },
       'WHITE': { best: ['NAVY', 'CHARCOAL', 'BEIGE', 'BLACK', 'KHAKI', 'BROWN'], bad: [], baseScore: 96 },
-      'BLACK': { best: ['CHARCOAL', 'WHITE', 'BEIGE', 'BROWN'], bad: ['NAVY'], baseScore: 90 },
+      'BLACK': { best: ['CHARCOAL', 'WHITE', 'BEIGE', 'BROWN', 'KHAKI'], bad: ['NAVY'], baseScore: 90 },
       'BEIGE': { best: ['NAVY', 'WHITE', 'CHARCOAL', 'KHAKI', 'BROWN'], bad: [], baseScore: 93 },
       'KHAKI': { best: ['WHITE', 'BEIGE', 'NAVY', 'BLACK'], bad: [], baseScore: 88 },
       'CHARCOAL': { best: ['WHITE', 'NAVY', 'BEIGE', 'BLACK'], bad: [], baseScore: 90 },
       'BROWN': { best: ['WHITE', 'BEIGE', 'NAVY', 'CHARCOAL'], bad: [], baseScore: 89 }
     };
+
+    function getBrandSearchUrl(brand, keyword) {
+      const q = encodeURIComponent(keyword);
+      switch(brand) {
+        case '헤지스':
+          return `https://www.lfmall.co.kr/p2/search/result?searchWord=${encodeURIComponent('헤지스 ' + keyword)}`;
+        case '닥스':
+          return `https://www.lfmall.co.kr/p2/search/result?searchWord=${encodeURIComponent('닥스 ' + keyword)}`;
+        case '올젠':
+          return `https://topten.topten10mall.com/kr/front/search/searchResult.do?searchTerm=${encodeURIComponent('올젠 ' + keyword)}`;
+        case '안다르':
+          return `https://andar.co.kr/product/search.html?keyword=${q}`;
+        default:
+          return `https://www.musinsa.com/search/musinsa/integration?type=&q=${q}`;
+      }
+    }
 
     /* ========================================================
      * 3. 애플리케이션 상태 변수
@@ -976,6 +1070,7 @@
     let currentCategory = 'TOP';
     let selectedColorFilter = null;
     let selectedFabricFilter = 'ALL';
+    let currentBrandFilter = 'ALL';
 
     // 고정 핀 모드: 'TOP' (상의 고정, 하의 추천) 또는 'BOTTOM' (하의 고정, 상의 추천)
     let pinnedMode = 'TOP';
@@ -983,7 +1078,7 @@
     let selectedTop = closetItems.find(i => i.category === 'TOP') || null;
     let selectedBottom = closetItems.find(i => i.category === 'BOTTOM') || null;
 
-    let matchedCandidates = []; // 현재 추천 후보 목록
+    let matchedCandidates = []; // 추천 후보 목록
     let candidateIndex = 0;
 
     let isCameraActive = false;
@@ -998,6 +1093,12 @@
       setupTouchGestures();
     });
 
+    function onBrandFilterChange(brand) {
+      currentBrandFilter = brand;
+      renderSidebar();
+      calculateMatches();
+    }
+
     function switchCategory(cat) {
       currentCategory = cat;
       ['TOP', 'BOTTOM', 'SHOES', 'BELT'].forEach(c => {
@@ -1008,11 +1109,7 @@
     }
 
     function filterColor(color) {
-      if (selectedColorFilter === color) {
-        selectedColorFilter = null;
-      } else {
-        selectedColorFilter = color;
-      }
+      selectedColorFilter = (selectedColorFilter === color) ? null : color;
       updateFilterUI();
       renderSidebar();
     }
@@ -1039,15 +1136,24 @@
       if (clearBtn) clearBtn.style.display = selectedColorFilter ? 'inline' : 'none';
     }
 
+    function getBrandClass(brand) {
+      if (brand === '헤지스') return 'hazzys';
+      if (brand === '닥스') return 'daks';
+      if (brand === '올젠') return 'olzen';
+      if (brand === '안다르') return 'andar';
+      return 'etc';
+    }
+
     function renderSidebar() {
       const listEl = document.getElementById('sidebarList');
       listEl.innerHTML = '';
 
       const filtered = closetItems.filter(item => {
         const matchCat = item.category === currentCategory;
+        const matchBrand = (currentBrandFilter === 'ALL' || item.brand === currentBrandFilter);
         const matchColor = selectedColorFilter ? item.color === selectedColorFilter : true;
         const matchFabric = selectedFabricFilter !== 'ALL' ? item.fabric === selectedFabricFilter : true;
-        return matchCat && matchColor && matchFabric;
+        return matchCat && matchBrand && matchColor && matchFabric;
       });
 
       document.getElementById('itemCount').innerText = filtered.length;
@@ -1064,11 +1170,16 @@
           thumbContent = `<img src="${item.image}" alt="${item.name}">`;
         }
 
+        const bClass = getBrandClass(item.brand);
+
         card.innerHTML = `
           <button class="item-del-btn" onclick="event.stopPropagation(); deleteItem('${item.id}')" title="삭제">✕</button>
           <div class="item-thumb">${thumbContent}</div>
           <div class="item-name">${item.name}</div>
-          <div class="item-meta">${item.color} · ${item.fabric}</div>
+          <div class="item-meta">
+            <span class="brand-tag ${bClass}">${item.brand || '기타'}</span>
+            <span>${item.color}</span>
+          </div>
         `;
         card.onclick = () => selectItemFromSidebar(item);
         listEl.appendChild(card);
@@ -1085,7 +1196,6 @@
         pinnedMode = 'BOTTOM';
         calculateMatches();
       } else if (item.category === 'SHOES' || item.category === 'BELT') {
-        // 소품 직접 선택 시 피드백
         calculateMatches();
       }
       renderSidebar();
@@ -1174,9 +1284,12 @@
 
         // 소재 조화 (계절감)
         if (top.fabric === 'LINEN' && b.fabric === 'LINEN') score += 10;
-        if (top.fabric === 'LINEN' && b.fabric === 'WOOL') score -= 30; // 여름+겨울 충돌
+        if (top.fabric === 'LINEN' && b.fabric === 'WOOL') score -= 30; // 린넨+울 충돌
         if (top.fabric === 'WOOL' && b.fabric === 'WOOL') score += 10;
         if (top.fabric === 'COTTON' && b.fabric === 'DENIM') score += 10;
+
+        // 브랜드 감성 시너지 (예: 헤지스+올젠, 닥스+올젠 클래식 캐주얼 조화)
+        if (top.brand === b.brand) score += 5;
 
         return { ...b, matchScore: Math.min(100, Math.max(35, score)) };
       }).sort((a, b) => b.matchScore - a.matchScore);
@@ -1194,6 +1307,8 @@
         if (t.fabric === 'LINEN' && bottom.fabric === 'WOOL') score -= 30;
         if (t.fabric === 'WOOL' && bottom.fabric === 'WOOL') score += 10;
         if (t.fabric === 'COTTON' && bottom.fabric === 'DENIM') score += 10;
+
+        if (t.brand === bottom.brand) score += 5;
 
         return { ...t, matchScore: Math.min(100, Math.max(35, score)) };
       }).sort((a, b) => b.matchScore - a.matchScore);
@@ -1222,6 +1337,10 @@
       if (selectedTop) {
         document.getElementById('topTitle').innerText = selectedTop.name;
         document.getElementById('topSub').innerText = `${selectedTop.color} · ${selectedTop.fabric}`;
+        const topBrandEl = document.getElementById('topBrandPill');
+        topBrandEl.innerText = selectedTop.brand || '헤지스';
+        topBrandEl.className = `stage-brand-pill brand-tag ${getBrandClass(selectedTop.brand)}`;
+
         const topWrap = document.getElementById('topIconWrap');
         if (selectedTop.image) {
           topWrap.innerHTML = `<img src="${selectedTop.image}">`;
@@ -1234,6 +1353,10 @@
       if (selectedBottom) {
         document.getElementById('bottomTitle').innerText = selectedBottom.name;
         document.getElementById('bottomSub').innerText = `${selectedBottom.color} · ${selectedBottom.fabric}`;
+        const bottomBrandEl = document.getElementById('bottomBrandPill');
+        bottomBrandEl.innerText = selectedBottom.brand || '올젠';
+        bottomBrandEl.className = `stage-brand-pill brand-tag ${getBrandClass(selectedBottom.brand)}`;
+
         const bottomWrap = document.getElementById('bottomIconWrap');
         if (selectedBottom.image) {
           bottomWrap.innerHTML = `<img src="${selectedBottom.image}">`;
@@ -1279,7 +1402,7 @@
       } else if (score >= 70) {
         pill.className = 'score-pill mid';
         pill.innerHTML = `👌 ${score}점 (안정적 코디)`;
-        scoreDesc.innerText = '자연스럽고 무난한 데일리 조합입니다.';
+        scoreDesc.innerText = '자연스럽고 품격 있는 데일리 조합입니다.';
       } else {
         pill.className = 'score-pill low';
         pill.innerHTML = `⚠️ ${score}점 (조화 주의)`;
@@ -1298,45 +1421,50 @@
       const shoesIcon = document.getElementById('shoesIcon');
       const shoesTitle = document.getElementById('shoesTitle');
       const shoesDesc = document.getElementById('shoesDesc');
+      const shoesBrandLabel = document.getElementById('shoesBrandLabel');
 
       if (matchedShoes) {
         shoesIcon.innerHTML = matchedShoes.icon || '👞';
         shoesTitle.innerText = matchedShoes.name;
-        shoesDesc.innerText = `내 옷장 ${matchedShoes.color} 매칭`;
+        shoesBrandLabel.innerText = `소장 [${matchedShoes.brand || '슈즈'}]`;
+        shoesDesc.innerText = `${matchedShoes.color} 가죽 톤 일치 매칭`;
       } else {
         shoesIcon.innerHTML = '👟';
         shoesTitle.innerText = '화이트 스니커즈 추천';
+        shoesBrandLabel.innerText = '소장 슈즈 매칭';
         shoesDesc.innerText = '신발 등록 필요';
       }
 
-      // 선호 브랜드 갭 보충 (무신사/유니클로 타깃 검색)
+      // 선호 브랜드 갭 보충 (헤지스/닥스/올젠/안다르 공식 검색 직결)
       const gapCard = document.getElementById('gapBrandCard');
       const gapIcon = document.getElementById('gapIcon');
       const gapTitle = document.getElementById('gapItemTitle');
       const gapSubLabel = document.getElementById('gapSubLabel');
       const gapBrandName = document.getElementById('gapBrandName');
 
-      let gapSearchQuery = '';
+      // 타깃 브랜드 결정 (선택된 브랜드 또는 상의 브랜드)
+      const targetBrand = (currentBrandFilter !== 'ALL') ? currentBrandFilter : (selectedTop.brand || '헤지스');
+
+      let searchKeyword = '';
       if (score < 70) {
-        // 조화도가 낮을 경우 대체 하의 제안
         const recBottomColor = topRule.best[0] || 'BEIGE';
-        gapSearchQuery = `${recBottomColor === 'BEIGE' ? '베이지' : '네이비'} 와이드 슬랙스`;
-        gapSubLabel.innerText = '조화도 보충 추천';
-        gapTitle.innerText = `${gapSearchQuery}`;
-        gapBrandName.innerText = '무신사 스탠다드 검색 ↗';
+        searchKeyword = `${recBottomColor === 'BEIGE' ? '베이지' : '네이비'} 치노 슬랙스`;
+        gapSubLabel.innerText = `${targetBrand} 조화도 보충`;
+        gapTitle.innerText = `${searchKeyword}`;
+        gapBrandName.innerText = `${targetBrand} 공식몰 검색 ↗`;
       } else if (!matchedBelt) {
-        gapSearchQuery = `${targetLeatherColor === 'BROWN' ? '브라운' : '블랙'} 가죽 벨트`;
-        gapSubLabel.innerText = '필수 소품 부재';
-        gapTitle.innerText = gapSearchQuery;
-        gapBrandName.innerText = '무신사 벨트 검색 ↗';
+        searchKeyword = `${targetLeatherColor === 'BROWN' ? '브라운' : '블랙'} 가죽 벨트`;
+        gapSubLabel.innerText = `${targetBrand} 필수 소품 부재`;
+        gapTitle.innerText = searchKeyword;
+        gapBrandName.innerText = `${targetBrand} 벨트 검색 ↗`;
       } else {
-        gapSearchQuery = `${targetLeatherColor === 'BROWN' ? '브라운' : '블랙'} 클래식 가죽 시계`;
-        gapSubLabel.innerText = '스타일 완성 소품';
-        gapTitle.innerText = gapSearchQuery;
-        gapBrandName.innerText = '무신사 소품 검색 ↗';
+        searchKeyword = `${targetBrand === '안다르' ? '에어스트' : '클래식'} 신상 컬렉션`;
+        gapSubLabel.innerText = `${targetBrand} 추천 매칭`;
+        gapTitle.innerText = searchKeyword;
+        gapBrandName.innerText = `${targetBrand} 공식몰 검색 ↗`;
       }
 
-      gapCard.href = `https://www.musinsa.com/search/musinsa/integration?type=&q=${encodeURIComponent(gapSearchQuery)}`;
+      gapCard.href = getBrandSearchUrl(targetBrand, searchKeyword);
     }
 
     /* ========================================================
@@ -1358,13 +1486,10 @@
         const diffX = touchEndX - touchStartX;
         const diffY = touchEndY - touchStartY;
 
-        // 수평 스와이프가 주된 방향일 때만 동작 (최소 40px)
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
           if (diffX < 0) {
-            // 왼쪽 스와이프 -> 다음 후보
             navigateItem(pinnedMode === 'TOP' ? 'BOTTOM' : 'TOP', 1);
           } else {
-            // 오른쪽 스와이프 -> 이전 후보
             navigateItem(pinnedMode === 'TOP' ? 'BOTTOM' : 'TOP', -1);
           }
         }
@@ -1418,6 +1543,7 @@
      * ======================================================== */
     function openAddModal() {
       document.getElementById('newCategory').value = currentCategory;
+      document.getElementById('newBrand').value = (currentBrandFilter !== 'ALL') ? currentBrandFilter : '헤지스';
       document.getElementById('newName').value = '';
       document.getElementById('newPhoto').value = '';
       document.getElementById('addModal').classList.add('open');
@@ -1428,6 +1554,7 @@
     }
 
     function saveNewItem() {
+      const brand = document.getElementById('newBrand').value;
       const category = document.getElementById('newCategory').value;
       const name = document.getElementById('newName').value.trim();
       const color = document.getElementById('newColor').value;
@@ -1448,6 +1575,7 @@
 
       const newItem = {
         id: 'item_' + Date.now(),
+        brand,
         category,
         name,
         color,
