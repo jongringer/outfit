@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Smart Closet Stylist - 스마트 옷장 & 코디</title>
+  <style>
+    :root {
+      --bg-color: #0d0f12;
+      --panel-bg: #15181f;
+      --card-bg: #1c202a;
+      --card-border: #293040;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: #050608;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 9:16 모바일 전용 뷰포트 컨테이너 */
+    .app-viewport {
+      width: 100vw;
+      height: 100vh;
+      max-width: 450px;
+      max-height: 840px;
+      background-color: var(--bg-color);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+      border: 1px solid #1e2330;
+    }
+
+    @media (max-width: 480px) {
+      .app-viewport {
+        max-width: 100vw;
+        max-height: 100vh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+
+    /* 1. 상단 헤더 */
+    header {
+      height: 54px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      background-color: var(--panel-bg);
+      z-index: 20;
+    }
+
+    .brand-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title span {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 18px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+    .icon-btn.primary {
+      background-color: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+    .icon-btn.active-cam {
+      background-color: var(--accent-red);
+      border-color: var(--accent-red);
+      color: #fff;
+    }
+
+    /* 2. 메인 워크스페이스 */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 좌측 세로 옷장 사이드바 (약 30% 폭) */
+    .closet-sidebar {
+      width: 32%;
+      min-width: 125px;
+      max-width: 145px;
+      background-color: var(--panel-bg);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      padding: 8px 6px;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .category-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      background: #0d0f13;
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .cat-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      padding: 5px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .cat-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    /* 필터 영역 */
+    .filter-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      padding: 0 2px;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 2px 1px 4px 1px;
+      scrollbar-width: none;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+
+    .color-chip {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.25);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .color-chip:active { transform: scale(0.9); }
+    .color-chip.active {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+      transform: scale(1.1);
+    }
+
+    .text-chip {
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #0d0f14;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.58rem;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .text-chip.active {
+      background: var(--accent-blue);
+      color: #fff;
+      border-color: var(--accent-blue);
+    }
+
+    /* 보유 아이템 목록 리스트 */
+    .sidebar-items-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .sidebar-items {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      scrollbar-width: none;
+      padding-right: 1px;
+    }
+    .sidebar-items::-webkit-scrollbar { display: none; }
+
+    .item-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      position: relative;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .item-card:hover {
+      border-color: #3b4252;
+    }
+    .item-card.selected {
+      border-color: var(--accent-blue);
+      background-color: rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .item-thumb {
+      width: 100%;
+      height: 42px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      background-color: #242a36;
+      overflow: hidden;
+    }
+    .item-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-name {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      color: var(--text-main);
+    }
+
+    .item-meta {
+      font-size: 0.52rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .item-del-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #aaa;
+      border: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      font-size: 0.5rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .item-card:hover .item-del-btn {
+      display: flex;
+    }
+
+    /* 3. 중앙 피팅 스테이지 (Fitting Stage) */
+    .fitting-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #0b0d10;
+      position: relative;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    /* 거울 카메라 비디오 피드 */
+    #camera-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: none;
+      z-index: 1;
+      filter: brightness(0.85) contrast(1.05);
+    }
+
+    .stage-half {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      transition: background-color 0.2s;
+      z-index: 2;
+    }
+    .stage-half:last-child {
+      border-bottom: none;
+    }
+
+    /* 상/하의 고정(Pinned) 뱃지 & 모드 토글 */
+    .stage-header-badge {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      background: rgba(18, 22, 30, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.63rem;
+      color: #93c5fd;
+      font-weight: 700;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+    }
+    .stage-header-badge.pinned {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(14, 116, 144, 0.4);
+    }
+
+    .stage-item-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      z-index: 3;
+      padding: 10px;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+    }
+
+    .stage-icon-wrap {
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(30, 35, 48, 0.5) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .stage-icon-wrap img {
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      object-fit: cover;
+    }
+
+    .stage-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .stage-sub {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* 좌우 스와이프/탐색 버튼 */
+    .stage-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(20, 24, 32, 0.75);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      z-index: 6;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .stage-nav:active {
+      transform: translateY(-50%) scale(0.9);
+      background: var(--accent-blue);
+    }
+    .stage-nav.prev { left: 8px; }
+    .stage-nav.next { right: 8px; }
+
+    .stage-counter {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      background: rgba(0,0,0,0.5);
+      padding: 1px 6px;
+      border-radius: 8px;
+      z-index: 5;
+    }
+
+    /* 4. 하단 코디 추천 & 갭 위젯 */
+    .bottom-widget-bar {
+      min-height: 138px;
+      background-color: var(--panel-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 8px 12px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .score-pill {
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .score-pill.high {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .score-pill.mid {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .score-pill.low {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .rec-cards-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      height: 74px;
+    }
+
+    .rec-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .rec-card:active {
+      transform: scale(0.98);
+    }
+
+    .rec-icon {
+      font-size: 1.45rem;
+      background: #252b38;
+      width: 36px;
+      height: 36px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .rec-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      line-height: 1.25;
+    }
+
+    .rec-sub {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .rec-main {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rec-link-label {
+      font-size: 0.6rem;
+      color: var(--accent-orange);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .rec-link-label.closet {
+      color: var(--accent-blue);
+    }
+
+    /* 5. 모달 (아이템 등록 & 설정) */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 340px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .modal-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .form-input, .form-select {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .modal-btn.cancel {
+      background: var(--card-bg);
+      color: var(--text-muted);
+    }
+    .modal-btn.submit {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-viewport" id="appViewport">
+    <!-- 1. 상단 탑바 -->
+    <header>
+      <div class="brand-title">
+        <span>Closet</span>Stylist
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btnAddItem" onclick="openAddModal()">
+          ➕ 등록
+        </button>
+        <button class="icon-btn primary" id="cameraToggleBtn" onclick="toggleCamera()">
+          📷 거울 모드
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. 메인 워크스페이스 -->
+    <div class="main-workspace">
+      <!-- 좌측 세로 옷장 사이드바 -->
+      <aside class="closet-sidebar">
+        <!-- 카테고리 탭 (상의 / 하의 / 신발 / 벨트) -->
+        <div class="category-tabs">
+          <button class="cat-btn active" id="tabTOP" onclick="switchCategory('TOP')">상의</button>
+          <button class="cat-btn" id="tabBOTTOM" onclick="switchCategory('BOTTOM')">하의</button>
+          <button class="cat-btn" id="tabSHOES" onclick="switchCategory('SHOES')">신발</button>
+          <button class="cat-btn" id="tabBELT" onclick="switchCategory('BELT')">벨트</button>
+        </div>
+
+        <!-- 색상 필터 -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span>색상</span>
+            <span id="clearColorBtn" style="cursor:pointer; color:var(--accent-blue); display:none;" onclick="clearColorFilter()">초기화</span>
+          </div>
+          <div class="filter-chips" id="colorChips">
+            <div class="color-chip" data-color="NAVY" style="background: #1e3a8a;" title="네이비" onclick="filterColor('NAVY')"></div>
+            <div class="color-chip" data-color="WHITE" style="background: #ffffff;" title="화이트" onclick="filterColor('WHITE')"></div>
+            <div class="color-chip" data-color="BLACK" style="background: #111827;" title="블랙" onclick="filterColor('BLACK')"></div>
+            <div class="color-chip" data-color="BEIGE" style="background: #d4a373;" title="베이지" onclick="filterColor('BEIGE')"></div>
+            <div class="color-chip" data-color="KHAKI" style="background: #4b5320;" title="카키" onclick="filterColor('KHAKI')"></div>
+            <div class="color-chip" data-color="CHARCOAL" style="background: #374151;" title="차콜" onclick="filterColor('CHARCOAL')"></div>
+            <div class="color-chip" data-color="BROWN" style="background: #78350f;" title="브라운" onclick="filterColor('BROWN')"></div>
+          </div>
+        </div>
+
+        <!-- 소재 필터 -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span>소재</span>
+          </div>
+          <div class="filter-chips" id="fabricChips">
+            <div class="text-chip" data-fabric="ALL" onclick="filterFabric('ALL')">전체</div>
+            <div class="text-chip" data-fabric="COTTON" onclick="filterFabric('COTTON')">코튼</div>
+            <div class="text-chip" data-fabric="LINEN" onclick="filterFabric('LINEN')">린넨</div>
+            <div class="text-chip" data-fabric="DENIM" onclick="filterFabric('DENIM')">데님</div>
+            <div class="text-chip" data-fabric="WOOL" onclick="filterFabric('WOOL')">울</div>
+            <div class="text-chip" data-fabric="LEATHER" onclick="filterFabric('LEATHER')">레더</div>
+          </div>
+        </div>
+
+        <!-- 옷장 아이템 목록 -->
+        <div class="sidebar-items-wrap">
+          <div class="filter-header">
+            <span>소장 옷장 (<span id="itemCount">0</span>)</span>
+          </div>
+          <div class="sidebar-items" id="sidebarList">
+            <!-- 자바스크립트로 렌더링 -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- 중앙 피팅 스테이지 -->
+      <main class="fitting-stage" id="fittingStage">
+        <!-- 거울 카메라 비디오 -->
+        <video id="camera-video" autoplay playsinline muted></video>
+
+        <!-- 상의 스테이지 영역 -->
+        <div class="stage-half" id="stageTopArea">
+          <div class="stage-header-badge" id="topPinBadge" onclick="togglePinMode('TOP')">
+            <span>📌 상의 고정</span>
+          </div>
+          <button class="stage-nav prev" id="topNavPrev" onclick="navigateItem('TOP', -1)" style="display:none;">◀</button>
+          
+          <div class="stage-item-display" id="stageTopDisplay">
+            <div class="stage-icon-wrap" id="topIconWrap">👔</div>
+            <div class="stage-title" id="topTitle">상의 선택</div>
+            <div class="stage-sub" id="topSub">목록에서 클릭 또는 스와이프</div>
+          </div>
+
+          <button class="stage-nav next" id="topNavNext" onclick="navigateItem('TOP', 1)" style="display:none;">▶</button>
+          <div class="stage-counter" id="topCounter" style="display:none;">1/1</div>
+        </div>
+
+        <!-- 하의 스테이지 영역 -->
+        <div class="stage-half" id="stageBottomArea">
+          <div class="stage-header-badge" id="bottomPinBadge" onclick="togglePinMode('BOTTOM')">
+            <span>추천 매칭 하의</span>
+          </div>
+          <button class="stage-nav prev" id="bottomNavPrev" onclick="navigateItem('BOTTOM', -1)">◀</button>
+
+          <div class="stage-item-display" id="stageBottomDisplay">
+            <div class="stage-icon-wrap" id="bottomIconWrap">👖</div>
+            <div class="stage-title" id="bottomTitle">하의 자동 매칭</div>
+            <div class="stage-sub" id="bottomSub">상의에 맞춘 조화 추천</div>
+          </div>
+
+          <button class="stage-nav next" id="bottomNavNext" onclick="navigateItem('BOTTOM', 1)">▶</button>
+          <div class="stage-counter" id="bottomCounter">1/1</div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 3. 하단 코디 조화도 및 소품 / 갭 추천 바 -->
+    <div class="bottom-widget-bar">
+      <div class="score-row">
+        <div class="score-title-group">
+          <span>스타일 조화도</span>
+          <span style="font-size:0.6rem; color:var(--text-dim);" id="scoreDesc">상·하의 밸런스 분석</span>
+        </div>
+        <div class="score-pill high" id="scorePill">
+          <span>✨ 95점 (최상)</span>
+        </div>
+      </div>
+
+      <div class="rec-cards-container">
+        <!-- 소장 신발/벨트 매칭 카드 -->
+        <div class="rec-card" id="shoesCard">
+          <div class="rec-icon" id="shoesIcon">👞</div>
+          <div class="rec-details">
+            <span class="rec-sub">보유 슈즈 매칭</span>
+            <span class="rec-main" id="shoesTitle">화이트 스니커즈</span>
+            <span class="rec-link-label closet" id="shoesDesc">내 옷장 코디 연동</span>
+          </div>
+        </div>
+
+        <!-- 선호 브랜드 갭 보충 카드 -->
+        <a class="rec-card" id="gapBrandCard" href="https://www.musinsa.com" target="_blank" rel="noopener">
+          <div class="rec-icon" id="gapIcon">🔍</div>
+          <div class="rec-details">
+            <span class="rec-sub" id="gapSubLabel">부족 아이템 갭 채우기</span>
+            <span class="rec-main" id="gapItemTitle">브라운 가죽 벨트</span>
+            <span class="rec-link-label" id="gapBrandName">무신사 스탠다드 검색 ↗</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 4. 새 아이템 등록 모달 -->
+    <div class="modal-overlay" id="addModal">
+      <div class="modal-box">
+        <div class="modal-title">
+          <span>내 옷장 아이템 등록</span>
+          <button class="modal-close" onclick="closeAddModal()">✕</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">카테고리</label>
+          <select class="form-select" id="newCategory">
+            <option value="TOP">상의 (TOP)</option>
+            <option value="BOTTOM">하의 (BOTTOM)</option>
+            <option value="SHOES">신발 (SHOES)</option>
+            <option value="BELT">벨트 (BELT)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">아이템 이름</label>
+          <input type="text" class="form-input" id="newName" placeholder="예: 린넨 카라 셔츠" maxlength="20">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">색상</label>
+          <select class="form-select" id="newColor">
+            <option value="NAVY">네이비 (NAVY)</option>
+            <option value="WHITE">화이트 (WHITE)</option>
+            <option value="BLACK">블랙 (BLACK)</option>
+            <option value="BEIGE">베이지 (BEIGE)</option>
+            <option value="KHAKI">카키 (KHAKI)</option>
+            <option value="CHARCOAL">차콜 (CHARCOAL)</option>
+            <option value="BROWN">브라운 (BROWN)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">소재</label>
+          <select class="form-select" id="newFabric">
+            <option value="COTTON">코튼 (COTTON)</option>
+            <option value="LINEN">린넨 (LINEN)</option>
+            <option value="DENIM">데님 (DENIM)</option>
+            <option value="WOOL">울/니트 (WOOL)</option>
+            <option value="LEATHER">가죽 (LEATHER)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">아이콘 또는 사진 선택</label>
+          <input type="file" id="newPhoto" accept="image/*" class="form-input" style="padding:4px 6px;">
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeAddModal()">취소</button>
+          <button class="modal-btn submit" onclick="saveNewItem()">옷장에 추가</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ========================================================
+     * 1. 기본 옷장 데이터 & 영속성 관리 (LocalStorage)
+     * ======================================================== */
+    const STORAGE_KEY = 'SMART_CLOSET_ITEMS_V2';
+
+    const defaultItems = [
+      { id: 't1', category: 'TOP', name: '린넨 셔츠', color: 'NAVY', fabric: 'LINEN', icon: '👔' },
+      { id: 't2', category: 'TOP', name: '옥스포드 셔츠', color: 'WHITE', fabric: 'COTTON', icon: '👕' },
+      { id: 't3', category: 'TOP', name: '피케 카라티', color: 'BLACK', fabric: 'COTTON', icon: '👕' },
+      { id: 't4', category: 'TOP', name: '울 라운드 니트', color: 'BEIGE', fabric: 'WOOL', icon: '🧶' },
+      { id: 't5', category: 'TOP', name: '데님 셔츠', color: 'NAVY', fabric: 'DENIM', icon: '👔' },
+
+      { id: 'b1', category: 'BOTTOM', name: '치노 슬랙스', color: 'BEIGE', fabric: 'COTTON', icon: '👖' },
+      { id: 'b2', category: 'BOTTOM', name: '테이퍼드 슬랙스', color: 'CHARCOAL', fabric: 'WOOL', icon: '👖' },
+      { id: 'b3', category: 'BOTTOM', name: '생지 데님 팬츠', color: 'NAVY', fabric: 'DENIM', icon: '👖' },
+      { id: 'b4', category: 'BOTTOM', name: '린넨 이지 팬츠', color: 'WHITE', fabric: 'LINEN', icon: '🩳' },
+      { id: 'b5', category: 'BOTTOM', name: '카키 카고 슬랙스', color: 'KHAKI', fabric: 'COTTON', icon: '👖' },
+
+      { id: 's1', category: 'SHOES', name: '화이트 레더 스니커즈', color: 'WHITE', fabric: 'LEATHER', icon: '👟' },
+      { id: 's2', category: 'SHOES', name: '다크브라운 페니 로퍼', color: 'BROWN', fabric: 'LEATHER', icon: '👞' },
+      { id: 's3', category: 'SHOES', name: '블랙 더비 슈즈', color: 'BLACK', fabric: 'LEATHER', icon: '👞' },
+
+      { id: 'l1', category: 'BELT', name: '다크브라운 소가죽 벨트', color: 'BROWN', fabric: 'LEATHER', icon: '🪢' },
+      { id: 'l2', category: 'BELT', name: '블랙 스퀘어 버클 벨트', color: 'BLACK', fabric: 'LEATHER', icon: '🪢' }
+    ];
+
+    let closetItems = loadCloset();
+
+    function loadCloset() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error("Local storage load error:", e);
+      }
+      return [...defaultItems];
+    }
+
+    function saveCloset() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(closetItems));
+      } catch (e) {
+        console.error("Local storage save error:", e);
+      }
+    }
+
+    /* ========================================================
+     * 2. 스타일링 룰 엔진 (Color, Fabric, Leather Match)
+     * ======================================================== */
+    const colorRules = {
+      'NAVY': { best: ['BEIGE', 'WHITE', 'CHARCOAL', 'KHAKI'], bad: ['BLACK'], baseScore: 92 },
+      'WHITE': { best: ['NAVY', 'CHARCOAL', 'BEIGE', 'BLACK', 'KHAKI', 'BROWN'], bad: [], baseScore: 96 },
+      'BLACK': { best: ['CHARCOAL', 'WHITE', 'BEIGE', 'BROWN'], bad: ['NAVY'], baseScore: 90 },
+      'BEIGE': { best: ['NAVY', 'WHITE', 'CHARCOAL', 'KHAKI', 'BROWN'], bad: [], baseScore: 93 },
+      'KHAKI': { best: ['WHITE', 'BEIGE', 'NAVY', 'BLACK'], bad: [], baseScore: 88 },
+      'CHARCOAL': { best: ['WHITE', 'NAVY', 'BEIGE', 'BLACK'], bad: [], baseScore: 90 },
+      'BROWN': { best: ['WHITE', 'BEIGE', 'NAVY', 'CHARCOAL'], bad: [], baseScore: 89 }
+    };
+
+    /* ========================================================
+     * 3. 애플리케이션 상태 변수
+     * ======================================================== */
+    let currentCategory = 'TOP';
+    let selectedColorFilter = null;
+    let selectedFabricFilter = 'ALL';
+
+    // 고정 핀 모드: 'TOP' (상의 고정, 하의 추천) 또는 'BOTTOM' (하의 고정, 상의 추천)
+    let pinnedMode = 'TOP';
+
+    let selectedTop = closetItems.find(i => i.category === 'TOP') || null;
+    let selectedBottom = closetItems.find(i => i.category === 'BOTTOM') || null;
+
+    let matchedCandidates = []; // 현재 추천 후보 목록
+    let candidateIndex = 0;
+
+    let isCameraActive = false;
+    let cameraStream = null;
+
+    /* ========================================================
+     * 4. 초기화 & 렌더링
+     * ======================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      calculateMatches();
+      setupTouchGestures();
+    });
+
+    function switchCategory(cat) {
+      currentCategory = cat;
+      ['TOP', 'BOTTOM', 'SHOES', 'BELT'].forEach(c => {
+        const btn = document.getElementById(`tab${c}`);
+        if (btn) btn.classList.toggle('active', c === cat);
+      });
+      renderSidebar();
+    }
+
+    function filterColor(color) {
+      if (selectedColorFilter === color) {
+        selectedColorFilter = null;
+      } else {
+        selectedColorFilter = color;
+      }
+      updateFilterUI();
+      renderSidebar();
+    }
+
+    function clearColorFilter() {
+      selectedColorFilter = null;
+      updateFilterUI();
+      renderSidebar();
+    }
+
+    function filterFabric(fabric) {
+      selectedFabricFilter = fabric;
+      document.querySelectorAll('#fabricChips .text-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.fabric === fabric);
+      });
+      renderSidebar();
+    }
+
+    function updateFilterUI() {
+      document.querySelectorAll('#colorChips .color-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.color === selectedColorFilter);
+      });
+      const clearBtn = document.getElementById('clearColorBtn');
+      if (clearBtn) clearBtn.style.display = selectedColorFilter ? 'inline' : 'none';
+    }
+
+    function renderSidebar() {
+      const listEl = document.getElementById('sidebarList');
+      listEl.innerHTML = '';
+
+      const filtered = closetItems.filter(item => {
+        const matchCat = item.category === currentCategory;
+        const matchColor = selectedColorFilter ? item.color === selectedColorFilter : true;
+        const matchFabric = selectedFabricFilter !== 'ALL' ? item.fabric === selectedFabricFilter : true;
+        return matchCat && matchColor && matchFabric;
+      });
+
+      document.getElementById('itemCount').innerText = filtered.length;
+
+      filtered.forEach(item => {
+        const isSelected = (item.category === 'TOP' && selectedTop && selectedTop.id === item.id) ||
+                           (item.category === 'BOTTOM' && selectedBottom && selectedBottom.id === item.id);
+
+        const card = document.createElement('div');
+        card.className = `item-card ${isSelected ? 'selected' : ''}`;
+        
+        let thumbContent = item.icon || '👕';
+        if (item.image) {
+          thumbContent = `<img src="${item.image}" alt="${item.name}">`;
+        }
+
+        card.innerHTML = `
+          <button class="item-del-btn" onclick="event.stopPropagation(); deleteItem('${item.id}')" title="삭제">✕</button>
+          <div class="item-thumb">${thumbContent}</div>
+          <div class="item-name">${item.name}</div>
+          <div class="item-meta">${item.color} · ${item.fabric}</div>
+        `;
+        card.onclick = () => selectItemFromSidebar(item);
+        listEl.appendChild(card);
+      });
+    }
+
+    function selectItemFromSidebar(item) {
+      if (item.category === 'TOP') {
+        selectedTop = item;
+        pinnedMode = 'TOP';
+        calculateMatches();
+      } else if (item.category === 'BOTTOM') {
+        selectedBottom = item;
+        pinnedMode = 'BOTTOM';
+        calculateMatches();
+      } else if (item.category === 'SHOES' || item.category === 'BELT') {
+        // 소품 직접 선택 시 피드백
+        calculateMatches();
+      }
+      renderSidebar();
+    }
+
+    /* ========================================================
+     * 5. 매칭 엔진 & 조화도 산출 알고리즘
+     * ======================================================== */
+    function togglePinMode(clickedArea) {
+      pinnedMode = clickedArea;
+      calculateMatches();
+    }
+
+    function calculateMatches() {
+      const topBadge = document.getElementById('topPinBadge');
+      const bottomBadge = document.getElementById('bottomPinBadge');
+      const topPrev = document.getElementById('topNavPrev');
+      const topNext = document.getElementById('topNavNext');
+      const topCounter = document.getElementById('topCounter');
+      const bottomPrev = document.getElementById('bottomNavPrev');
+      const bottomNext = document.getElementById('bottomNavNext');
+      const bottomCounter = document.getElementById('bottomCounter');
+
+      if (pinnedMode === 'TOP') {
+        // 상의 고정 -> 하의 추천 정렬
+        topBadge.innerHTML = '<span>📌 상의 고정</span>';
+        topBadge.classList.add('pinned');
+        bottomBadge.innerHTML = '<span>🔄 추천 하의 (탐색)</span>';
+        bottomBadge.classList.remove('pinned');
+
+        topPrev.style.display = 'none';
+        topNext.style.display = 'none';
+        topCounter.style.display = 'none';
+        bottomPrev.style.display = 'flex';
+        bottomNext.style.display = 'flex';
+        bottomCounter.style.display = 'block';
+
+        const bottomList = closetItems.filter(i => i.category === 'BOTTOM');
+        if (!selectedTop && closetItems.length > 0) {
+          selectedTop = closetItems.find(i => i.category === 'TOP') || null;
+        }
+
+        matchedCandidates = scoreBottomsForTop(selectedTop, bottomList);
+        candidateIndex = 0;
+        if (matchedCandidates.length > 0) {
+          selectedBottom = matchedCandidates[0];
+        }
+      } else {
+        // 하의 고정 -> 상의 추천 정렬
+        bottomBadge.innerHTML = '<span>📌 하의 고정</span>';
+        bottomBadge.classList.add('pinned');
+        topBadge.innerHTML = '<span>🔄 추천 상의 (탐색)</span>';
+        topBadge.classList.remove('pinned');
+
+        topPrev.style.display = 'flex';
+        topNext.style.display = 'flex';
+        topCounter.style.display = 'block';
+        bottomPrev.style.display = 'none';
+        bottomNext.style.display = 'none';
+        bottomCounter.style.display = 'none';
+
+        const topList = closetItems.filter(i => i.category === 'TOP');
+        if (!selectedBottom && closetItems.length > 0) {
+          selectedBottom = closetItems.find(i => i.category === 'BOTTOM') || null;
+        }
+
+        matchedCandidates = scoreTopsForBottom(selectedBottom, topList);
+        candidateIndex = 0;
+        if (matchedCandidates.length > 0) {
+          selectedTop = matchedCandidates[0];
+        }
+      }
+
+      updateFittingStage();
+      updateRecommendations();
+    }
+
+    function scoreBottomsForTop(top, bottoms) {
+      if (!top) return bottoms;
+      const rule = colorRules[top.color] || { best: [], bad: [], baseScore: 70 };
+
+      return bottoms.map(b => {
+        let score = 70;
+        if (rule.best.includes(b.color)) score += 20;
+        if (rule.bad.includes(b.color)) score -= 25;
+
+        // 소재 조화 (계절감)
+        if (top.fabric === 'LINEN' && b.fabric === 'LINEN') score += 10;
+        if (top.fabric === 'LINEN' && b.fabric === 'WOOL') score -= 30; // 여름+겨울 충돌
+        if (top.fabric === 'WOOL' && b.fabric === 'WOOL') score += 10;
+        if (top.fabric === 'COTTON' && b.fabric === 'DENIM') score += 10;
+
+        return { ...b, matchScore: Math.min(100, Math.max(35, score)) };
+      }).sort((a, b) => b.matchScore - a.matchScore);
+    }
+
+    function scoreTopsForBottom(bottom, tops) {
+      if (!bottom) return tops;
+      return tops.map(t => {
+        const rule = colorRules[t.color] || { best: [], bad: [], baseScore: 70 };
+        let score = 70;
+        if (rule.best.includes(bottom.color)) score += 20;
+        if (rule.bad.includes(bottom.color)) score -= 25;
+
+        if (t.fabric === 'LINEN' && bottom.fabric === 'LINEN') score += 10;
+        if (t.fabric === 'LINEN' && bottom.fabric === 'WOOL') score -= 30;
+        if (t.fabric === 'WOOL' && bottom.fabric === 'WOOL') score += 10;
+        if (t.fabric === 'COTTON' && bottom.fabric === 'DENIM') score += 10;
+
+        return { ...t, matchScore: Math.min(100, Math.max(35, score)) };
+      }).sort((a, b) => b.matchScore - a.matchScore);
+    }
+
+    function navigateItem(targetArea, direction) {
+      if (matchedCandidates.length === 0) return;
+
+      candidateIndex = (candidateIndex + direction + matchedCandidates.length) % matchedCandidates.length;
+      if (pinnedMode === 'TOP') {
+        selectedBottom = matchedCandidates[candidateIndex];
+      } else {
+        selectedTop = matchedCandidates[candidateIndex];
+      }
+
+      updateFittingStage();
+      updateRecommendations();
+      renderSidebar();
+    }
+
+    /* ========================================================
+     * 6. 피팅 스테이지 화면 업데이트
+     * ======================================================== */
+    function updateFittingStage() {
+      // 상의 렌더
+      if (selectedTop) {
+        document.getElementById('topTitle').innerText = selectedTop.name;
+        document.getElementById('topSub').innerText = `${selectedTop.color} · ${selectedTop.fabric}`;
+        const topWrap = document.getElementById('topIconWrap');
+        if (selectedTop.image) {
+          topWrap.innerHTML = `<img src="${selectedTop.image}">`;
+        } else {
+          topWrap.innerHTML = selectedTop.icon || '👔';
+        }
+      }
+
+      // 하의 렌더
+      if (selectedBottom) {
+        document.getElementById('bottomTitle').innerText = selectedBottom.name;
+        document.getElementById('bottomSub').innerText = `${selectedBottom.color} · ${selectedBottom.fabric}`;
+        const bottomWrap = document.getElementById('bottomIconWrap');
+        if (selectedBottom.image) {
+          bottomWrap.innerHTML = `<img src="${selectedBottom.image}">`;
+        } else {
+          bottomWrap.innerHTML = selectedBottom.icon || '👖';
+        }
+      }
+
+      // 카운터 텍스트 업데이트
+      if (pinnedMode === 'TOP') {
+        document.getElementById('bottomCounter').innerText = `${candidateIndex + 1}/${matchedCandidates.length}`;
+      } else {
+        document.getElementById('topCounter').innerText = `${candidateIndex + 1}/${matchedCandidates.length}`;
+      }
+    }
+
+    /* ========================================================
+     * 7. 하단 추천 바 & 소품 매칭 및 갭 보충 (Gap Filling)
+     * ======================================================== */
+    function updateRecommendations() {
+      if (!selectedTop || !selectedBottom) return;
+
+      // 최종 조화도 점수 계산
+      let score = 75;
+      const topRule = colorRules[selectedTop.color] || { best: [], bad: [] };
+      if (topRule.best.includes(selectedBottom.color)) score += 18;
+      if (topRule.bad.includes(selectedBottom.color)) score -= 25;
+
+      // 소재 충돌 감점
+      if ((selectedTop.fabric === 'LINEN' && selectedBottom.fabric === 'WOOL') ||
+          (selectedTop.fabric === 'WOOL' && selectedBottom.fabric === 'LINEN')) {
+        score -= 30;
+      }
+      score = Math.min(99, Math.max(40, score));
+
+      const pill = document.getElementById('scorePill');
+      const scoreDesc = document.getElementById('scoreDesc');
+
+      if (score >= 90) {
+        pill.className = 'score-pill high';
+        pill.innerHTML = `✨ ${score}점 (최고의 조화)`;
+        scoreDesc.innerText = '컬러와 텍스처 밸런스가 매우 완벽합니다.';
+      } else if (score >= 70) {
+        pill.className = 'score-pill mid';
+        pill.innerHTML = `👌 ${score}점 (안정적 코디)`;
+        scoreDesc.innerText = '자연스럽고 무난한 데일리 조합입니다.';
+      } else {
+        pill.className = 'score-pill low';
+        pill.innerHTML = `⚠️ ${score}점 (조화 주의)`;
+        scoreDesc.innerText = '색상 대비 또는 계절 소재 불일치가 있습니다.';
+      }
+
+      // 소장 신발 & 벨트 매칭 (구두-벨트 톤 매치 룰)
+      const shoesList = closetItems.filter(i => i.category === 'SHOES');
+      const beltList = closetItems.filter(i => i.category === 'BELT');
+
+      let targetLeatherColor = (selectedBottom.color === 'BEIGE' || selectedTop.color === 'BEIGE' || selectedTop.fabric === 'LINEN') ? 'BROWN' : 'BLACK';
+      let matchedShoes = shoesList.find(s => s.color === targetLeatherColor) || shoesList[0];
+      let matchedBelt = beltList.find(b => b.color === targetLeatherColor) || beltList[0];
+
+      const shoesCard = document.getElementById('shoesCard');
+      const shoesIcon = document.getElementById('shoesIcon');
+      const shoesTitle = document.getElementById('shoesTitle');
+      const shoesDesc = document.getElementById('shoesDesc');
+
+      if (matchedShoes) {
+        shoesIcon.innerHTML = matchedShoes.icon || '👞';
+        shoesTitle.innerText = matchedShoes.name;
+        shoesDesc.innerText = `내 옷장 ${matchedShoes.color} 매칭`;
+      } else {
+        shoesIcon.innerHTML = '👟';
+        shoesTitle.innerText = '화이트 스니커즈 추천';
+        shoesDesc.innerText = '신발 등록 필요';
+      }
+
+      // 선호 브랜드 갭 보충 (무신사/유니클로 타깃 검색)
+      const gapCard = document.getElementById('gapBrandCard');
+      const gapIcon = document.getElementById('gapIcon');
+      const gapTitle = document.getElementById('gapItemTitle');
+      const gapSubLabel = document.getElementById('gapSubLabel');
+      const gapBrandName = document.getElementById('gapBrandName');
+
+      let gapSearchQuery = '';
+      if (score < 70) {
+        // 조화도가 낮을 경우 대체 하의 제안
+        const recBottomColor = topRule.best[0] || 'BEIGE';
+        gapSearchQuery = `${recBottomColor === 'BEIGE' ? '베이지' : '네이비'} 와이드 슬랙스`;
+        gapSubLabel.innerText = '조화도 보충 추천';
+        gapTitle.innerText = `${gapSearchQuery}`;
+        gapBrandName.innerText = '무신사 스탠다드 검색 ↗';
+      } else if (!matchedBelt) {
+        gapSearchQuery = `${targetLeatherColor === 'BROWN' ? '브라운' : '블랙'} 가죽 벨트`;
+        gapSubLabel.innerText = '필수 소품 부재';
+        gapTitle.innerText = gapSearchQuery;
+        gapBrandName.innerText = '무신사 벨트 검색 ↗';
+      } else {
+        gapSearchQuery = `${targetLeatherColor === 'BROWN' ? '브라운' : '블랙'} 클래식 가죽 시계`;
+        gapSubLabel.innerText = '스타일 완성 소품';
+        gapTitle.innerText = gapSearchQuery;
+        gapBrandName.innerText = '무신사 소품 검색 ↗';
+      }
+
+      gapCard.href = `https://www.musinsa.com/search/musinsa/integration?type=&q=${encodeURIComponent(gapSearchQuery)}`;
+    }
+
+    /* ========================================================
+     * 8. 모바일 터치 스와이프 제스처
+     * ======================================================== */
+    function setupTouchGestures() {
+      const stage = document.getElementById('fittingStage');
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      stage.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      stage.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // 수평 스와이프가 주된 방향일 때만 동작 (최소 40px)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+          if (diffX < 0) {
+            // 왼쪽 스와이프 -> 다음 후보
+            navigateItem(pinnedMode === 'TOP' ? 'BOTTOM' : 'TOP', 1);
+          } else {
+            // 오른쪽 스와이프 -> 이전 후보
+            navigateItem(pinnedMode === 'TOP' ? 'BOTTOM' : 'TOP', -1);
+          }
+        }
+      }, { passive: true });
+    }
+
+    /* ========================================================
+     * 9. 실시간 거울 카메라 모드 토글
+     * ======================================================== */
+    async function toggleCamera() {
+      const video = document.getElementById('camera-video');
+      const toggleBtn = document.getElementById('cameraToggleBtn');
+      const stageTopDisplay = document.getElementById('stageTopDisplay');
+      const stageBottomDisplay = document.getElementById('stageBottomDisplay');
+
+      if (!isCameraActive) {
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' },
+            audio: false
+          });
+          video.srcObject = cameraStream;
+          video.style.display = 'block';
+          stageTopDisplay.style.opacity = '0.35';
+          stageBottomDisplay.style.opacity = '0.35';
+
+          toggleBtn.innerText = '❌ 거울 끄기';
+          toggleBtn.className = 'icon-btn active-cam';
+          isCameraActive = true;
+        } catch (err) {
+          console.error(err);
+          alert('전면 카메라 접근 권한이 필요합니다. 권한을 확인해주세요.');
+        }
+      } else {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          cameraStream = null;
+        }
+        video.style.display = 'none';
+        stageTopDisplay.style.opacity = '1';
+        stageBottomDisplay.style.opacity = '1';
+
+        toggleBtn.innerText = '📷 거울 모드';
+        toggleBtn.className = 'icon-btn primary';
+        isCameraActive = false;
+      }
+    }
+
+    /* ========================================================
+     * 10. 아이템 등록 & 삭제 모달
+     * ======================================================== */
+    function openAddModal() {
+      document.getElementById('newCategory').value = currentCategory;
+      document.getElementById('newName').value = '';
+      document.getElementById('newPhoto').value = '';
+      document.getElementById('addModal').classList.add('open');
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('open');
+    }
+
+    function saveNewItem() {
+      const category = document.getElementById('newCategory').value;
+      const name = document.getElementById('newName').value.trim();
+      const color = document.getElementById('newColor').value;
+      const fabric = document.getElementById('newFabric').value;
+      const photoFile = document.getElementById('newPhoto').files[0];
+
+      if (!name) {
+        alert('아이템 이름을 입력해주세요.');
+        return;
+      }
+
+      const defaultIcons = {
+        'TOP': '👕',
+        'BOTTOM': '👖',
+        'SHOES': '👞',
+        'BELT': '🪢'
+      };
+
+      const newItem = {
+        id: 'item_' + Date.now(),
+        category,
+        name,
+        color,
+        fabric,
+        icon: defaultIcons[category] || '👔'
+      };
+
+      if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          newItem.image = e.target.result;
+          closetItems.unshift(newItem);
+          saveCloset();
+          closeAddModal();
+          switchCategory(category);
+          calculateMatches();
+        };
+        reader.readAsDataURL(photoFile);
+      } else {
+        closetItems.unshift(newItem);
+        saveCloset();
+        closeAddModal();
+        switchCategory(category);
+        calculateMatches();
+      }
+    }
+
+    function deleteItem(id) {
+      if (confirm('이 아이템을 옷장에서 삭제하시겠습니까?')) {
+        closetItems = closetItems.filter(item => item.id !== id);
+        saveCloset();
+        if (selectedTop && selectedTop.id === id) selectedTop = closetItems.find(i => i.category === 'TOP') || null;
+        if (selectedBottom && selectedBottom.id === id) selectedBottom = closetItems.find(i => i.category === 'BOTTOM') || null;
+        renderSidebar();
+        calculateMatches();
+      }
+    }
+  </script>
+</body>
+</html>

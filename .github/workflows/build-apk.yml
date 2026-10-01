@@ -1,0 +1,87 @@
+name: Build Android APK and Release with QR Code
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Android Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Build Web Assets & Sync Capacitor
+        run: |
+          npm run cap:sync
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission to Gradlew
+        run: |
+          chmod +x ./android/gradlew
+
+      - name: Build Android Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Verify APK Output
+        run: |
+          ls -la android/app/build/outputs/apk/debug/
+          test -f android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Prepare Release Info
+        id: release_info
+        run: |
+          TAG_NAME="v1.0.${{ github.run_number }}"
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/app-debug.apk"
+          QR_URL="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${DOWNLOAD_URL}"
+          
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "download_url=${DOWNLOAD_URL}" >> $GITHUB_OUTPUT
+          echo "qr_url=${QR_URL}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with APK & QR Code
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag_name }}
+          name: "Smart Closet Stylist ${{ steps.release_info.outputs.tag_name }}"
+          body: |
+            ## 📱 스마트 옷장 & 코디 (Smart Closet Stylist) APK 다운로드
+            
+            스마트폰 카메라로 아래 **QR 코드**를 스캔하시면 APK 파일이 즉시 다운로드됩니다!
+            
+            ![Download QR Code](${{ steps.release_info.outputs.qr_url }})
+            
+            - **직접 다운로드 링크**: [app-debug.apk 다운로드](${{ steps.release_info.outputs.download_url }})
+            - **빌드 번호**: ${{ github.run_number }}
+            - **커밋**: ${{ github.sha }}
+            
+            > **안드로이드 설치 안내**: 다운로드 후 '출처를 알 수 없는 앱 설치 허용'을 켜주시면 즉시 설치 및 실행됩니다.
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

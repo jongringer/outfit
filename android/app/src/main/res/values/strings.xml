@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SmartCloset</string>
+    <string name="title_activity_main">SmartCloset</string>
+    <string name="package_name">com.smartcloset.stylist</string>
+    <string name="custom_url_scheme">com.smartcloset.stylist</string>
+</resources>
