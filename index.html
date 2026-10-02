@@ -33,66 +33,69 @@
       touch-action: manipulation;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
       background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      overflow: auto;
       touch-action: pan-x pan-y pinch-zoom;
-      padding: env(safe-area-inset-top, 8px) 0 env(safe-area-inset-bottom, 12px) 0;
     }
 
-    /* 갤럭시 S23 (19.5:9) 맞춤 뷰포트 컨테이너 (상하 바 가림 방지) */
+    /* 뷰포트 컨테이너 (상하 바 가림 완벽 방지 flexbox 레이아웃) */
     .app-viewport {
-      width: 100vw;
-      height: calc(100vh - env(safe-area-inset-top, 8px) - env(safe-area-inset-bottom, 14px));
-      max-width: 380px;
-      max-height: 780px;
-      aspect-ratio: 9 / 19.5;
-      background: linear-gradient(165deg, #181d2a 0%, #1e2538 45%, #111522 100%);
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      max-width: 440px;
+      margin: 0 auto;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      background: linear-gradient(165deg, #181d2a 0%, #1e2538 45%, #111522 100%);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 35px rgba(99, 102, 241, 0.2);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 20px;
-      margin: auto;
-      padding-top: env(safe-area-inset-top, 0px);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    @media (max-width: 480px) {
+    @media (min-width: 480px) {
       .app-viewport {
-        width: 100vw;
-        max-width: 100vw;
-        height: calc(100vh - env(safe-area-inset-top, 12px) - env(safe-area-inset-bottom, 20px));
-        max-height: calc(100vh - 32px);
-        border-radius: 14px;
-        margin: calc(env(safe-area-inset-top, 6px) + 4px) auto calc(env(safe-area-inset-bottom, 12px) + 4px) auto;
+        border-radius: 20px;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        height: min(100%, 820px);
+        margin: auto;
       }
     }
 
-    /* 1. 상단 헤더 (높이 슬림화) */
+    /* 1. 상단 헤더 (고정 및 노치 안전 영역 지원) */
     header {
-      height: 48px;
-      padding: 0 10px;
+      flex-shrink: 0;
+      padding: max(6px, env(safe-area-inset-top, 0px)) 10px 6px 10px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 5px;
       border-bottom: 1px solid var(--card-border);
       background: linear-gradient(90deg, #151822 0%, #1e2433 100%);
       z-index: 20;
     }
 
-    .brand-title-wrap {
+    .header-row-top {
       display: flex;
-      flex-direction: column;
-      line-height: 1.15;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
+    }
+
+    .header-row-sub {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
     }
 
     .brand-title {
@@ -101,7 +104,7 @@
       letter-spacing: -0.4px;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .brand-title span {
@@ -488,38 +491,38 @@
     }
 
     .stage-icon-wrap {
-      width: 74px;
-      height: 74px;
-      border-radius: 16px;
+      width: 62px;
+      height: 62px;
+      border-radius: 14px;
       background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(30, 35, 48, 0.5) 100%);
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.7rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      font-size: 2.2rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
       transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .stage-icon-wrap img {
       width: 100%;
       height: 100%;
-      border-radius: 15px;
+      border-radius: 13px;
       object-fit: cover;
     }
 
     .stage-title {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
     .stage-sub {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--text-muted);
       background: rgba(0, 0, 0, 0.4);
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 1px 6px;
+      border-radius: 8px;
     }
 
     /* 좌우 탐색 버튼 */
@@ -563,13 +566,13 @@
 
     /* 4. 하단 코디 추천 & 갭 위젯 */
     .bottom-widget-bar {
-      min-height: 138px;
+      flex-shrink: 0;
       background-color: var(--panel-bg);
       border-top: 1px solid var(--card-border);
-      padding: 8px 12px 10px 12px;
+      padding: 6px 10px max(8px, env(safe-area-inset-bottom, 0px)) 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       z-index: 20;
     }
 
@@ -583,14 +586,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 700;
     }
 
     .score-pill {
-      padding: 3px 9px;
+      padding: 2px 8px;
       border-radius: 12px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
       letter-spacing: -0.2px;
       display: flex;
@@ -616,18 +619,18 @@
     .rec-cards-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      height: 74px;
+      gap: 6px;
+      min-height: 56px;
     }
 
     .rec-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 9px;
-      padding: 6px 8px;
+      border-radius: 8px;
+      padding: 4px 7px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       text-decoration: none;
       color: inherit;
       position: relative;
@@ -639,11 +642,11 @@
     }
 
     .rec-icon {
-      font-size: 1.45rem;
+      font-size: 1.2rem;
       background: #252b38;
-      width: 36px;
-      height: 36px;
-      border-radius: 7px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -781,33 +784,40 @@
 <body>
 
   <div class="app-viewport" id="appViewport">
-    <!-- 1. 상단 탑바 -->
+    <!-- 1. 상단 탑바 (스마트폰 노치 & 안전 영역 호환) -->
     <header>
-      <div class="brand-title-wrap">
-        <div class="brand-title">
-          <span>Closet</span>Stylist
+      <div class="header-row-top">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="brand-title">
+            <span>Closet</span>Stylist
+          </div>
+          <!-- 사용자 신체 사이즈 프로필 뱃지 -->
+          <div class="user-profile-badge" title="신체 사이즈: 168cm / 71kg (숏 기장 선호핏)">
+            👤 168cm·71kg <span class="fit-chip">숏기장</span>
+          </div>
         </div>
-        <!-- 사용자 신체 사이즈 프로필 뱃지 -->
-        <div class="user-profile-badge" title="신체 사이즈: 168cm / 71kg (숏 기장 선호핏)">
-          👤 168cm · 71kg <span class="fit-chip">숏기장핏</span>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="btnAddItem" onclick="openAddModal()">
+            ➕ 옷
+          </button>
+          <button class="icon-btn primary" id="cameraToggleBtn" onclick="toggleCamera()">
+            📷 거울
+          </button>
         </div>
-        <!-- 선호 브랜드 설정 드롭다운 -->
-        <select class="brand-selector-header" id="headerBrandFilter" onchange="onBrandFilterChange(this.value)">
-          <option value="ALL">전체 브랜드 ▾</option>
-          <option value="헤지스" selected>헤지스 (HAZZYS)</option>
-          <option value="닥스">닥스 (DAKS)</option>
-          <option value="올젠">올젠 (OLZEN)</option>
-          <option value="안다르">안다르 (andar)</option>
-        </select>
       </div>
 
-      <div class="header-actions">
-        <button class="icon-btn" id="btnAddItem" onclick="openAddModal()">
-          ➕ 등록
-        </button>
-        <button class="icon-btn primary" id="cameraToggleBtn" onclick="toggleCamera()">
-          📷 거울 모드
-        </button>
+      <div class="header-row-sub">
+        <div style="display:flex; align-items:center; gap:6px; font-size:0.65rem; color:var(--text-muted); width:100%;">
+          <span style="white-space:nowrap; font-weight:600;">선호 브랜드:</span>
+          <select class="brand-selector-header" id="headerBrandFilter" onchange="onBrandFilterChange(this.value)" style="flex:1;">
+            <option value="ALL">전체 브랜드 ▾</option>
+            <option value="헤지스" selected>헤지스 (HAZZYS)</option>
+            <option value="닥스">닥스 (DAKS)</option>
+            <option value="올젠">올젠 (OLZEN)</option>
+            <option value="안다르">안다르 (andar)</option>
+          </select>
+        </div>
       </div>
     </header>
 
