@@ -340,6 +340,7 @@ fun CameraScannerScreen(
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -377,13 +378,14 @@ fun CameraScannerScreen(
                         }
 
                         val imageAnalysis = ImageAnalysis.Builder()
+                            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                             .build()
 
                         imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                             val detected = analyzeCenterColor(imageProxy)
                             imageProxy.close()
-                            (ctx as? ComponentActivity)?.runOnUiThread {
+                            ContextCompat.getMainExecutor(ctx).execute {
                                 detectedColorName = detected
                             }
                         }
@@ -392,7 +394,7 @@ fun CameraScannerScreen(
                         runCatching {
                             cameraProvider.unbindAll()
                             cameraProvider.bindToLifecycle(
-                                ctx as androidx.lifecycle.LifecycleOwner,
+                                lifecycleOwner,
                                 cameraSelector,
                                 preview,
                                 imageAnalysis
@@ -460,27 +462,29 @@ fun CameraScannerScreen(
 }
 
 private fun analyzeCenterColor(imageProxy: ImageProxy): String {
-    val bitmap = imageProxy.toBitmap() ?: return "미식별"
-    val centerX = bitmap.width / 2
-    val centerY = bitmap.height / 2
-    val pixel = bitmap.getPixel(centerX, centerY)
+    return runCatching {
+        val bitmap = imageProxy.toBitmap() ?: return "미식별"
+        val centerX = bitmap.width / 2
+        val centerY = bitmap.height / 2
+        val pixel = bitmap.getPixel(centerX, centerY)
 
-    val red = AndroidColor.red(pixel)
-    val green = AndroidColor.green(pixel)
-    val blue = AndroidColor.blue(pixel)
+        val red = AndroidColor.red(pixel)
+        val green = AndroidColor.green(pixel)
+        val blue = AndroidColor.blue(pixel)
 
-    val hsv = FloatArray(3)
-    AndroidColor.RGBToHSV(red, green, blue, hsv)
-    val hue = hsv[0]
-    val saturation = hsv[1]
-    val value = hsv[2]
+        val hsv = FloatArray(3)
+        AndroidColor.RGBToHSV(red, green, blue, hsv)
+        val hue = hsv[0]
+        val saturation = hsv[1]
+        val value = hsv[2]
 
-    return when {
-        value < 0.2f -> "모노톤(블랙)"
-        saturation < 0.15f -> if (value > 0.8f) "모노톤(화이트)" else "모노톤(그레이)"
-        hue in 0f..40f || hue in 330f..360f -> "웜톤(레드/옐로우)"
-        hue in 70f..160f -> "그린"
-        hue in 180f..260f -> "블루/네이비"
-        else -> "모노톤"
-    }
+        when {
+            value < 0.2f -> "모노톤(블랙)"
+            saturation < 0.15f -> if (value > 0.8f) "모노톤(화이트)" else "모노톤(그레이)"
+            hue in 0f..40f || hue in 330f..360f -> "웜톤(레드/옐로우)"
+            hue in 70f..160f -> "그린"
+            hue in 180f..260f -> "블루/네이비"
+            else -> "모노톤"
+        }
+    }.getOrDefault("미식별")
 }
