@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.8, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>Smart Closet Stylist - 스마트 옷장 & 맞춤 코디</title>
   <style>
     :root {
@@ -30,7 +30,7 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      touch-action: manipulation;
     }
 
     body {
@@ -41,7 +41,8 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
+      overflow: auto;
+      touch-action: pan-x pan-y pinch-zoom;
     }
 
     /* 9:16 모바일 전용 뷰포트 컨테이너 */
@@ -1613,6 +1614,45 @@
         calculateMatches();
       }
     }
+
+    /* ========================================================
+     * 11. 화면 전체 제스처 핀치 줌 (Pinch-to-Zoom) 컨트롤러
+     * ======================================================== */
+    (function initPinchZoom() {
+      let currentScale = 1.0;
+      let initialDist = 0;
+      let initialScale = 1.0;
+      const appEl = document.getElementById('appViewport') || document.body;
+
+      document.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 2) {
+          initialDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initialScale = currentScale;
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length === 2 && initialDist > 0) {
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const factor = currentDist / initialDist;
+          currentScale = Math.min(Math.max(0.8, initialScale * factor), 4.0);
+          appEl.style.transform = 'scale(' + currentScale + ')';
+          appEl.style.transformOrigin = 'center top';
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchend', function (e) {
+        if (e.touches.length < 2) {
+          initialDist = 0;
+        }
+      });
+    })();
   </script>
 </body>
 </html>
