@@ -7,33 +7,51 @@ on:
 
 jobs:
   build:
+    name: Build & Publish Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup Gradle 8.9
+        uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.9'
 
-      - run: gradle assembleDebug
+      - name: Build Debug APK
+        run: gradle assembleDebug
 
-      - id: create_release
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           files: app/build/outputs/apk/debug/app-debug.apk
           token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
 
-      - run: |
+      - name: Generate QR Code & Step Summary
+        run: |
           sudo apt-get install -y qrencode
           DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/v${{ github.run_number }}/app-debug.apk"
-          echo "APK URL: $DOWNLOAD_URL"
+          echo "=========================================="
+          echo "APK DOWNLOAD URL: $DOWNLOAD_URL"
+          echo "=========================================="
           qrencode -t ANSIUTF8 "$DOWNLOAD_URL"
+          
+          echo "## 📱 Jongringer Outfit APK Release v${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "Scan the QR code below with your phone camera to download the APK directly:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "![Release QR Code](https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=$DOWNLOAD_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[📥 **Direct APK Download Link**]($DOWNLOAD_URL)" >> $GITHUB_STEP_SUMMARY
