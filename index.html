@@ -34,7 +34,7 @@
     }
 
     body {
-      background-color: #050608;
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
       display: flex;
@@ -43,41 +43,49 @@
       min-height: 100vh;
       overflow: auto;
       touch-action: pan-x pan-y pinch-zoom;
+      padding: env(safe-area-inset-top, 8px) 0 env(safe-area-inset-bottom, 12px) 0;
     }
 
-    /* 9:16 모바일 전용 뷰포트 컨테이너 */
+    /* 갤럭시 S23 (19.5:9) 맞춤 뷰포트 컨테이너 (상하 바 가림 방지) */
     .app-viewport {
       width: 100vw;
-      height: 100vh;
-      max-width: 450px;
-      max-height: 840px;
-      background-color: var(--bg-color);
+      height: calc(100vh - env(safe-area-inset-top, 8px) - env(safe-area-inset-bottom, 14px));
+      max-width: 380px;
+      max-height: 780px;
+      aspect-ratio: 9 / 19.5;
+      background: linear-gradient(165deg, #181d2a 0%, #1e2538 45%, #111522 100%);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
-      border: 1px solid #1e2330;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 35px rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      margin: auto;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     @media (max-width: 480px) {
       .app-viewport {
+        width: 100vw;
         max-width: 100vw;
-        max-height: 100vh;
-        border: none;
-        border-radius: 0;
+        height: calc(100vh - env(safe-area-inset-top, 12px) - env(safe-area-inset-bottom, 20px));
+        max-height: calc(100vh - 32px);
+        border-radius: 14px;
+        margin: calc(env(safe-area-inset-top, 6px) + 4px) auto calc(env(safe-area-inset-bottom, 12px) + 4px) auto;
       }
     }
 
-    /* 1. 상단 헤더 */
+    /* 1. 상단 헤더 (높이 슬림화) */
     header {
-      height: 54px;
-      padding: 0 12px;
+      height: 48px;
+      padding: 0 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--card-border);
-      background-color: var(--panel-bg);
+      background: linear-gradient(90deg, #151822 0%, #1e2433 100%);
       z-index: 20;
     }
 
@@ -100,6 +108,28 @@
       background: linear-gradient(135deg, #60a5fa, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    /* 사용자 신체 프로필 뱃지 */
+    .user-profile-badge {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--card-border);
+      color: #e2e8f0;
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .user-profile-badge .fit-chip {
+      background: rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+      padding: 1px 4px;
+      border-radius: 6px;
+      font-size: 0.55rem;
+      font-weight: 700;
     }
 
     /* 상단 선호 브랜드 선택 드롭다운 */
@@ -757,6 +787,10 @@
         <div class="brand-title">
           <span>Closet</span>Stylist
         </div>
+        <!-- 사용자 신체 사이즈 프로필 뱃지 -->
+        <div class="user-profile-badge" title="신체 사이즈: 168cm / 71kg (숏 기장 선호핏)">
+          👤 168cm · 71kg <span class="fit-chip">숏기장핏</span>
+        </div>
         <!-- 선호 브랜드 설정 드롭다운 -->
         <select class="brand-selector-header" id="headerBrandFilter" onchange="onBrandFilterChange(this.value)">
           <option value="ALL">전체 브랜드 ▾</option>
@@ -969,8 +1003,11 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">아이콘 또는 사진 선택</label>
-          <input type="file" id="newPhoto" accept="image/*" class="form-input" style="padding:4px 6px;">
+          <label class="form-label">아이콘 또는 사진 선택 (AI 자동 분석 지원)</label>
+          <input type="file" id="newPhoto" accept="image/*" class="form-input" style="padding:4px 6px;" onchange="analyzeUploadedPhoto(this)">
+          <div id="aiDetectBadge" style="display:none; font-size:0.68rem; color:#34d399; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); padding:5px 8px; border-radius:6px; margin-top:4px;">
+            🤖 <b>AI 자동 판별 완료</b>: <span id="aiDetectText"></span> <br><span style="color:#9ca3af; font-size:0.6rem;">(필요한 경우 드롭다운에서 직접 변경할 수 있습니다)</span>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -1540,9 +1577,124 @@
     }
 
     /* ========================================================
-     * 10. 아이템 등록 & 삭제 모달
+     * 10-1. 업로드 이미지 AI 색상 & 소재 자동 분석 엔진
+     * ======================================================== */
+    function analyzeUploadedPhoto(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 64;
+          canvas.height = 64;
+          ctx.drawImage(img, 0, 0, 64, 64);
+
+          const imageData = ctx.getImageData(8, 8, 48, 48).data;
+          let rTotal = 0, gTotal = 0, bTotal = 0, samples = 0;
+          let brightnesses = [];
+
+          for (let i = 0; i < imageData.length; i += 12) {
+            const r = imageData[i];
+            const g = imageData[i+1];
+            const b = imageData[i+2];
+            const a = imageData[i+3];
+            if (a > 128) {
+              rTotal += r;
+              gTotal += g;
+              bTotal += b;
+              brightnesses.push((r + g + b) / 3);
+              samples++;
+            }
+          }
+
+          if (samples === 0) return;
+
+          const avgR = rTotal / samples;
+          const avgG = gTotal / samples;
+          const avgB = bTotal / samples;
+
+          const detectedColor = detectColorFromRGB(avgR, avgG, avgB);
+          const detectedFabric = detectFabricFromTexture(brightnesses, avgR, avgG, avgB);
+
+          if (detectedColor) document.getElementById('newColor').value = detectedColor;
+          if (detectedFabric) document.getElementById('newFabric').value = detectedFabric;
+
+          const badge = document.getElementById('aiDetectBadge');
+          const badgeText = document.getElementById('aiDetectText');
+          if (badge && badgeText) {
+            badgeText.innerText = `색상 [${getColorLabel(detectedColor)}] · 소재 [${getFabricLabel(detectedFabric)}]`;
+            badge.style.display = 'block';
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function detectColorFromRGB(r, g, b) {
+      const brightness = (r + g + b) / 3;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const delta = max - min;
+
+      if (brightness < 50) return 'BLACK';
+      if (brightness > 215 && delta < 25) return 'WHITE';
+      if (brightness > 70 && delta < 30) {
+        if (r > g && g > b) return 'BEIGE';
+        return 'CHARCOAL';
+      }
+
+      let h = 0;
+      if (delta !== 0) {
+        if (max === r) h = ((g - b) / delta) % 6;
+        else if (max === g) h = (b - r) / delta + 2;
+        else h = (r - g) / delta + 4;
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+      }
+
+      if (h >= 190 && h <= 250) return 'NAVY';
+      if (h >= 65 && h <= 150) return 'KHAKI';
+      if (h >= 15 && h <= 55) return (r > 130 && g > 100) ? 'BEIGE' : 'BROWN';
+      if (r > g && r > b && brightness > 100) return 'BEIGE';
+      
+      return 'CHARCOAL';
+    }
+
+    function detectFabricFromTexture(brightnesses, r, g, b) {
+      const avgBrightness = (r + g + b) / 3;
+      if (avgBrightness < 65 && Math.abs(r - g) < 15 && Math.abs(g - b) < 15) {
+        return 'LEATHER';
+      }
+      if (b > r + 12 && b > g + 8) {
+        return 'DENIM';
+      }
+      if (avgBrightness > 175) {
+        return 'LINEN';
+      }
+      return 'COTTON';
+    }
+
+    function getColorLabel(c) {
+      const map = { 'NAVY': '네이비', 'WHITE': '화이트', 'BLACK': '블랙', 'BEIGE': '베이지', 'KHAKI': '카키', 'CHARCOAL': '차콜', 'BROWN': '브라운' };
+      return map[c] || c;
+    }
+
+    function getFabricLabel(f) {
+      const map = { 'COTTON': '코튼', 'LINEN': '린넨', 'DENIM': '데님', 'WOOL': '울/니트', 'LEATHER': '가죽' };
+      return map[f] || f;
+    }
+
+    /* ========================================================
+     * 10-2. 아이템 등록 & 삭제 모달
      * ======================================================== */
     function openAddModal() {
+      const badge = document.getElementById('aiDetectBadge');
+      if (badge) badge.style.display = 'none';
       document.getElementById('newCategory').value = currentCategory;
       document.getElementById('newBrand').value = (currentBrandFilter !== 'ALL') ? currentBrandFilter : '헤지스';
       document.getElementById('newName').value = '';
