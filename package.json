@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('www')) fs.mkdirSync('www'); fs.copyFileSync('index.html', 'www/index.html');\"",
-    "cap:sync": "npm run build && npx cap sync",
+    "cap:sync": "npm run build && node -e \"const fs=require('fs'); if(fs.existsSync('android/app/src/main/assets/public')) fs.rmSync('android/app/src/main/assets/public', {recursive: true, force: true});\" && npx cap sync",
     "cap:open": "npx cap open android"
   },
   "keywords": [],
